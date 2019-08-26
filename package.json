@@ -1,0 +1,24 @@
+{
+  "name": "blackjack-blockchain",
+  "version": "1.0.0",
+  "description": "Implementation of the blackjack card game using a custom cryptocurrency. The cryptocurrency is based on the Ethereum platform, using the Solidity language and the concepts of Smart Contracts. The step by step guide on how to build the game is in the wiki (still under development).",
+  "main": "test.js",
+  "dependencies": {
+    "solc": "^0.5.11",
+    "web3": "^1.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndrewKM210/Blackjack-BlockChain.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndrewKM210/Blackjack-BlockChain/issues"
+  },
+  "homepage": "https://github.com/AndrewKM210/Blackjack-BlockChain#readme"
+}

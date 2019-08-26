@@ -45,7 +45,11 @@ contract Coin {
 	 * Returns the balance of the account 'addr'.
 	 * @return balance of the accounts 'addr'.
 	 */
-	function getBalance(address addr) public view returns(uint) {
+	function getBalance(address addr) public view returns(uint balance) {
 		return balances[addr];
+	}
+
+	function getAccount() public view returns(address add) {
+		add = msg.sender;
 	}
 }
