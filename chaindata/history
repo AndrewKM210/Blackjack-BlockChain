@@ -1,0 +1,5 @@
+miner.start()
+miner.stop()
+web.eth.getAccounts()
+web3.eth.getAccounts()
+web3.eth.accounts
