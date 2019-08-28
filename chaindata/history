@@ -3,3 +3,6 @@ miner.stop()
 web.eth.getAccounts()
 web3.eth.getAccounts()
 web3.eth.accounts
+web3.eth.unlockAccount(eth.accounts[0], 'asd', 0)
+miner.start()
+miner.stop()

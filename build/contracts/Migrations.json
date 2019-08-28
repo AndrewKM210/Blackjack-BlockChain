@@ -1377,12 +1377,12 @@
     "2105": {
       "events": {},
       "links": {},
-      "address": "0xC5172EFf152965b6e49846C1eDC84eCAAcb7CDef",
-      "transactionHash": "0xc232d32ed437fd987b3d3448ae34a7e38c9edccdc527eb0c744dba59c7d8e85c"
+      "address": "0x3b4C56197e95d00a8ACB526F691d1Fc6d933b4F9",
+      "transactionHash": "0x72c9bccc67bb5da6529e5c2408638e641442b1954bde743f90b10933e4106ce4"
     }
   },
   "schemaVersion": "3.0.13",
-  "updatedAt": "2019-08-26T16:15:37.148Z",
+  "updatedAt": "2019-08-28T19:31:00.378Z",
   "devdoc": {
     "methods": {}
   },
