@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <%
+            var currentCards = cards;
+            var currentDeque = deque;
+        %>
+        <script> localStorage.setItem('currentCards', currentCards)</script>
+        <script> localStorage.setItem('currentDeque', currentDeque)</script>
+        <% if (cards != undefined) { %>
+            <p>Your cards are: </p>
+            <ul>
+                <% cards.forEach(function(card) { %>
+                    <li><%= card.number%> - <%= card.suit%> </li>
+                <% }); %>
+            </ul>
+        <% } %>
+        <% if (deque == undefined) { %>
+            <form action="/deal" method="POST">
+                <input type="submit" value="Deal">
+            </form>
+        <% } else {%>
+            <form action="/another" method="POST">
+                <input type="submit" value="Another card">
+            </form>
+            <form action="/stay" method="POST">
+                <input type="submit" value="Stay">
+            </form>
+        <% } %>
+    </body>
+</html>

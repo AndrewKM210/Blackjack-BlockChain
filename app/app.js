@@ -1,7 +1,13 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var Web3 = require('web3');
+const express = require('express');
+const session = require('express-session');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const Web3 = require('web3');
+const Deque = require('./classes/Deque.js');
+const redis = require('redis');
+const redisStore = require('connect-redis')(session);
+
+const client  = redis.createClient();
 
 var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
@@ -29,7 +35,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '/')));
 
+app.use(session({
+  secret: 'f8o1nH2Fd24',
+
+  store: new redisStore({ host: 'localhost', port: 6379, client: client,ttl : 260}),
+  saveUninitialized: false,
+  resave: false
+}));
+
+
 app.get('/', function(req, res) {
+  req.session.hola = 'Hola!';
   res.render('index', {
     contract_address: contract_dir,
     default_account: web3.eth.defaultAccount
@@ -54,14 +70,18 @@ app.post('/login', function(req, res) {
         console.log('Error unlocking account: ' + error);
       } else {
         console.log('Account ' + account + ' unlocked!');
-        res.render('game');
+        req.session.account = account;
+        res.render('game', {
+          deque: undefined,
+          cards: undefined
+        });
       }
     });
   } else {
     console.log('Error: account is not a valid ethereum address')
     res.render('login', {
       error: 'Account is not a valid ethereum address'
-    })
+    });
   }
 });
 
@@ -76,6 +96,11 @@ app.post('/register', function(req, res) {
   if (password == req.body.password2) {
     web3.eth.personal.newAccount(password).then(function(newAccount) {
       console.log('Account created: ' + newAccount);
+      req.session.account = newAccount;
+      res.render('game', {
+        deque: undefined,
+        cards: undefined
+      })
     })
   } else {
     console.log('Error: the passwords are not the same');
@@ -83,4 +108,51 @@ app.post('/register', function(req, res) {
       error: 'The passwords are not the same'
     });
   }
+})
+
+app.get('/game', function(req, res) {
+  res.render('game', {
+    deque: undefined,
+    cards: undefined
+  });
+})
+
+app.post('/deal', function(req, res) {
+  var deque = new Deque();
+  var firstCards = [deque.firstCard(), deque.firstCard()];
+  req.session.deque = deque;
+  req.session.cards = firstCards;
+  req.session.score = firstCards[0].number + firstCards[1].number;
+  res.render('game', {
+    deque: deque,
+    cards: firstCards
+  })
+})
+
+app.post('/another', function(req, res) {
+  var deque = Object.assign(new Deque, req.session.deque);
+  var card = deque.firstCard();
+  req.session.cards.push(card);
+  if (req.session.score + card.number <= 21) {
+    console.log('User is still in game');
+    req.session.score += card.number;
+    res.render('game', {
+      deque: req.session.deque,
+      cards: req.session.cards,
+    });
+  } else {
+    console.log('User has surpassed 21 points');
+    res.render('game', {
+      deque: undefined,
+      cards: undefined
+    })
+  }
+})
+
+app.post('/goLogin', function(req, res) {
+  res.redirect('login');
+})
+
+app.post('/goRegister', function(req, res) {
+  res.redirect('register');
 })
