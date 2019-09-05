@@ -36,6 +36,31 @@ app.get('/', function (req, res) {
   });
 });
 
-app.listen(3001, function () {
+app.listen(3000, function () {
   console.log('App listening on port 3000.');
+});
+
+app.get('/login', function (req, res) {
+  res.render('login');
+});
+
+app.post('/login', function (req, res) {
+  account = req.body.account;
+  password = req.body.password;
+  console.log('Unlocking account ' + account + '...');
+  if (web3.utils.isAddress(account)) {
+    web3.eth.personal.unlockAccount(account, password, 0).then(function(ok, error) {
+      if (error != null) {
+        console.log('Error unlocking account: ' + error);
+      } else {
+        console.log('Account ' + account + ' unlocked!');
+        res.render('game');
+      }
+    });
+  } else {
+    console.log('Error: account is not a valid ethereum address')
+    res.render('login', {
+      error: 'Account is not a valid ethereum address'
+    })
+  }
 });
