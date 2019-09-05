@@ -29,14 +29,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '/')));
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
   res.render('index', {
     contract_address: contract_dir,
     default_account: web3.eth.defaultAccount
   });
 });
 
-app.listen(3000, function () {
+app.listen(3000, function() {
   console.log('App listening on port 3000.');
 });
 
@@ -44,10 +44,10 @@ app.get('/login', function (req, res) {
   res.render('login');
 });
 
-app.post('/login', function (req, res) {
+app.post('/login', function(req, res) {
   account = req.body.account;
   password = req.body.password;
-  console.log('Unlocking account ' + account + '...');
+  console.log('\n\nUNLOCKING ACCOUNT ' + account);
   if (web3.utils.isAddress(account)) {
     web3.eth.personal.unlockAccount(account, password, 0).then(function(ok, error) {
       if (error != null) {
@@ -64,3 +64,23 @@ app.post('/login', function (req, res) {
     })
   }
 });
+
+app.get('/register', function(req, res) {
+  res.render('register');
+})
+
+app.post('/register', function(req, res) {
+  console.log('\n\nCREATING NEW ACCOUNT');
+  password = req.body.password;
+  console.log('Checking passwords...');
+  if (password == req.body.password2) {
+    web3.eth.personal.newAccount(password).then(function(newAccount) {
+      console.log('Account created: ' + newAccount);
+    })
+  } else {
+    console.log('Error: the passwords are not the same');
+    res.render('register', {
+      error: 'The passwords are not the same'
+    });
+  }
+})
