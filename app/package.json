@@ -6,15 +6,19 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@truffle/contract": "^4.0.32",
     "connect-redis": "^4.0.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "ejs": "^2.7.1",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
+    "fstream": "^1.0.12",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
-    "redis": "^2.8.0"
+    "redis": "^2.8.0",
+    "sha3": "^2.0.7",
+    "truffle": "^5.0.35"
   }
 }

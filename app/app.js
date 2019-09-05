@@ -1,3 +1,4 @@
+// Import modules
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -6,38 +7,37 @@ const Web3 = require('web3');
 const Deque = require('./classes/Deque.js');
 const redis = require('redis');
 const redisStore = require('connect-redis')(session);
+const contract = require('@truffle/contract');
 
-const client  = redis.createClient();
-
+// Set the provider as the geth host
 var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
+// Load the compiled Coin.json file
 var fs = require('fs');
-var obj = JSON.parse(fs.readFileSync('..//build/contracts/Coin.json', 'utf8'));
+var conn = require('../build/contracts/Coin.json');
 
-const contract_dir = "0x860caeB3033a1B47d54e8Ef742B3D607f57730D7";
-console.log("Contract address: " + contract_dir);
-
-// TODO: get contract address automatically
-var contract = new web3.eth.Contract(obj.abi, contract_dir);
-
-web3.eth.getAccounts().then(function(accounts) {
-  web3.eth.defaultAccount = accounts[0];
-  console.log("Default account address: " + accounts[0]);
+// Create the contract object with the json loaded json file
+const myContract = contract(conn);
+var coinContract;
+myContract.setProvider(web3.currentProvider);
+myContract.deployed().then(function(instance) {
+  coinContract = instance;
+  console.log('Contract address: ' + coinContract.address);
 });
 
+// Create express app
 var app = express();
-
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '/')));
 
+// Create redis cliente, to store sessions
+const client  = redis.createClient();
 app.use(session({
   secret: 'f8o1nH2Fd24',
-
   store: new redisStore({ host: 'localhost', port: 6379, client: client,ttl : 260}),
   saveUninitialized: false,
   resave: false
@@ -45,7 +45,6 @@ app.use(session({
 
 
 app.get('/', function(req, res) {
-  req.session.hola = 'Hola!';
   res.render('index', {
     contract_address: contract_dir,
     default_account: web3.eth.defaultAccount
