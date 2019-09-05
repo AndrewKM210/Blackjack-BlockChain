@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html>
     <body>
-        <%
-            var currentCards = cards;
-            var currentDeque = deque;
-        %>
-        <script> localStorage.setItem('currentCards', currentCards)</script>
-        <script> localStorage.setItem('currentDeque', currentDeque)</script>
-        <% if (cards != undefined) { %>
+        <% if (!deal) { %>
             <p>Your cards are: </p>
             <ul>
                 <% cards.forEach(function(card) { %>
@@ -15,17 +9,22 @@
                 <% }); %>
             </ul>
         <% } %>
-        <% if (deque == undefined) { %>
+        <% if (deal) { %>
             <form action="/deal" method="POST">
                 <input type="submit" value="Deal">
             </form>
-        <% } else {%>
-            <form action="/another" method="POST">
-                <input type="submit" value="Another card">
+        <% } else if (userTurn) {%>
+            <form action="/play" method="POST">
+                <input type="submit" value="Play">
             </form>
             <form action="/stay" method="POST">
                 <input type="submit" value="Stay">
             </form>
+        <% } else { %>
+            <form action="/botTurn" method="POST">
+                <input type="submit" value="Bot turn">
+            </form>
         <% } %>
+        <p><%= message %></p>
     </body>
 </html>

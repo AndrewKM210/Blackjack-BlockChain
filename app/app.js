@@ -72,8 +72,12 @@ app.post('/login', function(req, res) {
         console.log('Account ' + account + ' unlocked!');
         req.session.account = account;
         res.render('game', {
-          deque: undefined,
-          cards: undefined
+          cards: undefined,
+          deal: true,
+          userTurn: false,
+          stayed: false,
+          botStayed: false,
+          message: 'Start by pressing the deal button'
         });
       }
     });
@@ -98,8 +102,9 @@ app.post('/register', function(req, res) {
       console.log('Account created: ' + newAccount);
       req.session.account = newAccount;
       res.render('game', {
-        deque: undefined,
-        cards: undefined
+        cards: undefined,
+        deal: true,
+        userTurn: false
       })
     })
   } else {
@@ -112,39 +117,63 @@ app.post('/register', function(req, res) {
 
 app.get('/game', function(req, res) {
   res.render('game', {
-    deque: undefined,
-    cards: undefined
+    cards: undefined,
+    deal: true,
+    userTurn: false
   });
 })
 
 app.post('/deal', function(req, res) {
   var deque = new Deque();
-  var firstCards = [deque.firstCard(), deque.firstCard()];
+  var firstCards = [deque.firstCard()];
+  var firstCardsBot = [deque.firstCard()];
+  firstCards.push(deque.firstCard());
+  firstCardsBot.push(deque.firstCard());
   req.session.deque = deque;
   req.session.cards = firstCards;
+  req.session.botCards = firstCardsBot;
   req.session.score = firstCards[0].number + firstCards[1].number;
+  req.session.botScore = firstCardsBot[0].number + firstCardsBot[1].number;
+  req.session.stayed = false;
+  req.session.botStayed = false;
   res.render('game', {
-    deque: deque,
-    cards: firstCards
+    cards: firstCards,
+    deal: false,
+    userTurn: true,
+    stayed: false,
+    botStayed: false,
+    message: 'Dealt the cards, you start.'
   })
 })
 
-app.post('/another', function(req, res) {
+app.post('/play', function(req, res) {
   var deque = Object.assign(new Deque, req.session.deque);
   var card = deque.firstCard();
   req.session.cards.push(card);
-  if (req.session.score + card.number <= 21) {
-    console.log('User is still in game');
-    req.session.score += card.number;
-    res.render('game', {
-      deque: req.session.deque,
-      cards: req.session.cards,
-    });
+  req.session.score += card.number;
+  if (req.session.score <= 21) {
+    if (req.session.botStayed) {
+      res.render('game', {
+        cards: req.session.cards,
+        deal: false,
+        userTurn: true,
+        message: 'You have chosen to play, your turn.',
+      });
+    } else {
+      res.render('game', {
+        cards: req.session.cards,
+        deal: false,
+        userTurn: false,
+        message: 'You have chosen to play, bot\'s turn.',
+      });
+    }
   } else {
     console.log('User has surpassed 21 points');
     res.render('game', {
-      deque: undefined,
-      cards: undefined
+      cards: undefined,
+      deal: true,
+      userTurn: false,
+      message: 'You have exceeded 21 points, bot wins.',
     })
   }
 })
@@ -156,3 +185,92 @@ app.post('/goLogin', function(req, res) {
 app.post('/goRegister', function(req, res) {
   res.redirect('register');
 })
+
+app.post('/botTurn', function(req, res) {
+  if (req.session.botScore < 17) {
+    var deque = Object.assign(new Deque(), req.session.queue);
+    var newCard = deque.firstCard();
+    req.session.botScore += newCard.number;
+    req.session.botCards.push(newCard);
+    if (req.session.botScore <= 21) {
+      if (!req.session.stayed) {
+        res.render('game', {
+          cards: req.session.cards,
+          deal: false,
+          userTurn: true,
+          message: 'Bot has chosen to play, your turn.',
+        });
+      } else {
+        res.render('game', {
+          cards: req.session.cards,
+          deal: false,
+          userTurn: false,
+          message: 'Bot has chosen to play, bot\'s turn.',
+        })
+      }
+    } else {
+      res.render('game', {
+        cards: req.session.cards,
+        deal: true,
+        userTurn: false,
+        message: 'Bot has exceeded 21 points, you win.',
+      })
+    }
+  } else {
+    req.session.botStayed = true;
+    var message;
+    if (req.session.stayed) {
+      message = 'You have both chosen to stay. Your score: ' + req.session.score + '   Bot score: ' + req.session.botScore;
+      if (req.session.score > req.session.botScore) {
+        message += '. You win!';
+      } else if (req.session.score < req.session.botScore) {
+        message += '. You loose!';
+      } else {
+        message += '. It\'s a draw!';
+      }
+      res.render('game', {
+        cards: req.session.cards,
+        deal: true,
+        userTurn: false,
+        message: message,
+      });
+    } else {
+      message = 'Bot has chosen to stay, your turn.';
+      res.render('game', {
+        cards: req.session.cards,
+        deal: false,
+        userTurn: true,
+        message: message,
+      })
+    }
+  }
+})
+
+app.post('/stay', function(req, res) {
+  req.session.stayed = true;
+  var message;
+  if (req.session.botStayed) {
+    message = 'You have both chosen to stay. Your score: ' + req.session.score + '   Bot score: ' + req.session.botScore;
+    if (req.session.score > req.session.botScore) {
+      message += '. You win!';
+    } else if (req.session.score < req.session.botScore) {
+      message += '. You loose!';
+    } else {
+      message += '. It\'s a draw!';
+    }
+    res.render('game', {
+      cards: req.session.cards,
+      deal: true,
+      userTurn: false,
+      message: message,
+    });
+  } else {
+    message = 'You have chosen to stay, bot\'s turn.'
+    res.render('game', {
+      cards: req.session.cards,
+      deal: false,
+      userTurn: false,
+      message: message,
+    });
+  }
+});
